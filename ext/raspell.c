@@ -73,7 +73,7 @@ static void aspell_free(void *p) {
  */
 static void check_for_error(AspellSpeller * speller) {
     if (aspell_speller_error(speller) != 0) {
-        rb_raise(cAspellError, aspell_speller_error_message(speller));
+        rb_raise(cAspellError, "%s", aspell_speller_error_message(speller));
     }
 }
 
@@ -87,11 +87,11 @@ static void check_for_error(AspellSpeller * speller) {
 static void set_option(AspellConfig *config, char *key, char *value) {
     //printf("set option: %s = %s\n", key, value);
     if (aspell_config_replace(config, key, value) == 0) {
-        rb_raise(cAspellError, aspell_config_error_message(config));
+        rb_raise(cAspellError, "%s", aspell_config_error_message(config));
     }
     //check config:
     if (aspell_config_error(config) != 0) {
-        rb_raise(cAspellError, aspell_config_error_message(config));
+        rb_raise(cAspellError, "%s", aspell_config_error_message(config));
     }
 }
 
@@ -132,7 +132,7 @@ static AspellDocumentChecker* get_checker(AspellSpeller *speller) {
     AspellDocumentChecker * checker;
     ret = new_aspell_document_checker(speller);
     if (aspell_error(ret) != 0)
-        rb_raise(cAspellError, aspell_error_message(ret));
+        rb_raise(cAspellError, "%s", aspell_error_message(ret));
     checker = to_aspell_document_checker(ret);
     return checker;
 }
@@ -214,7 +214,7 @@ static VALUE aspell_s_new(int argc, VALUE *argv, VALUE klass) {
     if (aspell_error(ret) != 0) {
         tmp = strdup(aspell_error_message(ret));
         delete_aspell_can_have_error(ret);
-        rb_raise(cAspellError, tmp);
+        rb_raise(cAspellError, "%s", tmp);
     }
 
     speller = to_aspell_speller(ret);
@@ -253,7 +253,7 @@ static VALUE aspell_s_new1(VALUE klass, VALUE options) {
     if (aspell_error(ret) != 0) {
         const char *tmp = strdup(aspell_error_message(ret));
         delete_aspell_can_have_error(ret);
-        rb_raise(cAspellError, tmp);
+        rb_raise(cAspellError, "%s", tmp);
     }
 
     speller = to_aspell_speller(ret);
@@ -289,7 +289,7 @@ static VALUE aspell_s_list_dicts(VALUE klass) {
 }
 
 /**
- * @see set_option. 
+ * @see set_option.
  */
 static VALUE aspell_set_option(VALUE self, VALUE option, VALUE value) {
     AspellSpeller *speller = get_speller(self);
@@ -400,7 +400,7 @@ static VALUE aspell_add_to_session(VALUE self, VALUE word) {
 
 /**
  * Retrieve the value of a specific option.
- * The options are listed inside 
+ * The options are listed inside
  * Aspell::[DictionaryOptions|CheckerOptions|FilterOptions|RunTogetherOptions|MiscOptions|UtilityOptions]
  * @param word the option as string.
  */
@@ -409,7 +409,7 @@ static VALUE aspell_conf_retrieve(VALUE self, VALUE key) {
     AspellConfig *config = aspell_speller_config(speller);
     VALUE result = rb_str_new2(aspell_config_retrieve(config, StringValuePtr(key)));
     if (aspell_config_error(config) != 0) {
-        rb_raise(cAspellError, aspell_config_error_message(config));
+        rb_raise(cAspellError, "%s", aspell_config_error_message(config));
     }
     return result;
 }
@@ -433,7 +433,7 @@ static VALUE aspell_conf_retrieve_list(VALUE self, VALUE key) {
     if (aspell_config_error(config) != 0) {
         char *tmp = strdup(aspell_config_error_message(config));
         delete_aspell_string_list(list);
-        rb_raise( cAspellError, tmp);
+        rb_raise( cAspellError, "%s", tmp);
     }
 
     //iterate over list
@@ -480,7 +480,7 @@ static VALUE aspell_check(VALUE self, VALUE word) {
     else if (code == 0)
         result = Qfalse;
     else
-        rb_raise( cAspellError, aspell_speller_error_message(speller));
+        rb_raise( cAspellError, "%s", aspell_speller_error_message(speller));
     return result;
 }
 
